@@ -115,6 +115,21 @@ export default function (data) {
 
 
 
+export function reference_scenario(data) {
+    // Siapkan header yang berisi Authorization: Bearer <token>
+    const headers = getHeaders(data.token);
+
+    // Panggil setiap fungsi endpoint (peserta latihan bisa mengaktifkan/menonaktifkan fungsi ini)
+    getReferencesList(headers);
+    //getReferenceDetail(headers, 1);
+    //checkReferenceCode(headers, 'REF_CURR_IDR');
+    //createReference(headers);
+    //updateReference(headers, 1);
+    //deleteReference(headers, 5);
+}
+
+
+
 // ====================================================================
 // 5. SIMPAN LAPORAN HASIL TEST KE FOLDER logs/
 // ====================================================================

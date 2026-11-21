@@ -52,7 +52,7 @@ export function login(username = 'super', password = 'super123') {
 
     if (res.status === 200) {
         const body = res.json();
-        if (body.data && body.data.token) {
+        if (body && body.data && body.data.token) {
             return body.data.token;
         }
     }
@@ -64,13 +64,16 @@ export function login(username = 'super', password = 'super123') {
 // ====================================================================
 // 3. SKENARIO UTAMA: TESTING ENDPOINT LOGIN
 // ====================================================================
-export default function () {
+export function login_scenario() {
     const token = login('super', 'super123');
 
     check(token, {
         'Login berhasil dan token diterima': (t) => t !== null && t.length > 0,
     });
+}
 
+export default function () {
+    login_scenario();
     sleep(1); // Jeda 1 detik antar iterasi
 }
 

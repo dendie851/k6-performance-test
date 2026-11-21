@@ -109,10 +109,10 @@ export default function (data) {
 export function news_scenario(token) {
     const headers = getHeaders(token);
     getNewsList(headers);
-    getNewsDetail(headers, 1);
-    createNews(headers);
-    updateNews(headers, 1);
-    deleteNews(headers, 3);
+    //getNewsDetail(headers, 1);
+    //createNews(headers);
+    //updateNews(headers, 1);
+    //deleteNews(headers, 3);
 }
 
 // ====================================================================
