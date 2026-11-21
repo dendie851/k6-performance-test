@@ -1,11 +1,12 @@
 # Performance Testing Suite - k6
 
-Dokumentasi ini berisi panduan lengkap pengujian performa (*load testing & stress testing*) menggunakan **k6**, mencakup persiapan Mock API Server, integrasi Postman, eksekusi skrip k6 modular, analisis hasil metrik, hingga sampel dokumen laporan resmi.
+Dokumentasi ini berisi panduan lengkap pengujian performa (*load testing & stress testing*) menggunakan **k6**, mencakup persiapan Mock API Server, integrasi Postman, eksekusi skrip k6 modular, analisis hasil metrik, diagram arsitektur pengujian, hingga sampel dokumen laporan resmi.
 
 ---
 
 ## 📑 Daftar Isi
 1. [Apa itu Performance Test?](#1-apa-itu-performance-test)
+    * [Tipe-Tipe Performance Testing](#tipe-tipe-performance-testing)
 2. [Apa itu k6 & Hello World](#2-apa-itu-k6--hello-world)
 3. [Struktur Proyek](#3-struktur-proyek)
 4. [Menjalankan Mock API Server](#4-menjalankan-mock-api-server)
@@ -19,7 +20,9 @@ Dokumentasi ini berisi panduan lengkap pengujian performa (*load testing & stres
 7. [Hasil Pengujian & Sampel Laporan (Report PDF)](#7-hasil-pengujian--sampel-laporan-report-pdf)
     * [Cara Membaca Metrik Utama](#cara-membaca-metrik-utama)
     * [Download Dokumen Sampel Report](#download-dokumen-sampel-report)
-8. [Manajemen Source Code & Kolaborasi QA](#8-manajemen-source-code--kolaborasi-qa)
+8. [Manajemen Source Code & Kolaborasi QA (design/colaboration.jpg)](#8-manajemen-source-code--kolaborasi-qa)
+    * [8.1 Diagram Alur Kerja Kolaborasi QA](#81-diagram-alur-kerja-kolaborasi-qa)
+    * [8.2 Keuntungan Arsitektur Modular](#82-keuntungan-arsitektur-modular)
 9. [Service Level Agreement (SLA)](#9-service-level-agreement-sla)
 10. [Optimasi TCP Connection & Handshake (Windows)](#10-optimasi-tcp-connection--handshake-windows)
 
@@ -32,6 +35,17 @@ Fokus utama pengujian ini meliputi:
 *   **Speed**: Seberapa cepat aplikasi merespons request pengguna.
 *   **Scalability**: Berapa kapasitas beban maksimum (Virtual Users) yang dapat ditangani.
 *   **Stability**: Apakah aplikasi stabil di bawah beban tinggi yang konstan maupun lonjakan drastis.
+
+### Tipe-Tipe Performance Testing
+Pengujian performa dibagi menjadi beberapa jenis pengujian sesuai tujuan dan skenario beban:
+
+![Tipe-Tipe Performance Testing](design/tipe-testing.jpg)
+
+*   **Load Testing**: Menguji perilaku sistem di bawah beban pengguna normal yang diharapkan.
+*   **Stress Testing**: Menguji batas kemampuan maksimal sistem hingga titik kegagalan (*breaking point*).
+*   **Spike Testing**: Menguji ketahanan sistem saat terjadi lonjakan traffic pengguna yang tiba-tiba.
+*   **Endurance / Soak Testing**: Menguji stabilitas dan kemungkinan kebocoran memori (*memory leak*) di bawah beban konstan dalam durasi panjang.
+*   **Scalability Testing**: Menguji efektivitas sistem saat kapasitas hardware atau pod diperluas (*scale-out*).
 
 ---
 
@@ -76,6 +90,10 @@ k6-performance-test/
 │   ├── login-payload.json
 │   ├── reference-create-payload.json
 │   └── news-create-payload.json
+├── design/                         # Diagram Desain Arsitektur & Alur Kerja
+│   ├── colaboration.jpg            # Diagram Alur Kerja & Kolaborasi Tim QA
+│   ├── tipe-testing.jpg            # Diagram Visual Jenis-Jenis Pengujian Performa
+│   └── design.drawio               # File Sumber Diagram Arsitektur (Draw.io)
 ├── lib/                            # Reusable Helpers
 │   └── auth_helper.js              # Helper fungsi login & penyedia Authorization Header
 ├── scripts/                        # Skrip Pengujian k6 per Modul
@@ -216,10 +234,20 @@ Dokumen laporan resmi hasil uji performa lengkap (mencakup ringkasan eksekutif, 
 ---
 
 ## 8. Manajemen Source Code & Kolaborasi QA
-Proyek ini mengadopsi prinsip arsitektur modular:
-1.  **Independent Scenarios**: Setiap modul (`login.js`, `reference.js`, `news.js`) dapat diuji sendiri-sendiri oleh QA tanpa bentrok (*merge conflicts*).
-2.  **Reusable Auth Helper**: Logika login dan pembuatan header Bearer Token diatur terpusat di `lib/auth_helper.js`.
+
+Proyek ini mengadopsi prinsip arsitektur modular untuk mendukung kolaborasi tim QA secara simultan tanpa konflik kode.
+
+### 8.1 Diagram Alur Kerja Kolaborasi QA
+Berikut adalah diagram alur kerja kolaborasi pengujian performance test (*collaboration workflow*) antar anggota tim QA:
+
+![Diagram Alur Kerja Kolaborasi QA](design/colaboration.jpg)
+
+### 8.2 Keuntungan Arsitektur Modular:
+1.  **No Merge Conflict**: Setiap QA mengelola file skrip terpisah (`login.js`, `reference.js`, `news.js`) sehingga tidak terjadi tabrakan kode saat melakukan commit dan push ke Git repository.
+2.  **Reusable Auth Helper**: Logika login dan pembuatan header Bearer Token diatur terpusat di `lib/auth_helper.js` dan dipakai bersama oleh seluruh skrip.
 3.  **Independent Functions**: Setiap endpoint memiliki fungsi mandirinya sendiri, memudahkan pemula untuk mengaktifkan atau menonaktifkan endpoint pengujian hanya dengan tanda komentar (`//`).
+4.  **Multi-Scenario Parallel Execution**: Semua modul dapat dijalankan bersamaan melalui `main.js` untuk menguji kapasitas sistem secara menyeluruh.
+5.  **Diagram Desain Sumber**: File sumber diagram lengkap tersedia di [design/design.drawio](design/design.drawio) yang dapat dibuka dan diedit menggunakan aplikasi [Draw.io / diagrams.net](https://app.diagrams.net/).
 
 ---
 
