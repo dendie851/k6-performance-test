@@ -1,0 +1,13 @@
+{
+  "name": "mock-api-server",
+  "version": "1.0.0",
+  "description": "Mock API Server Node.js for k6 Performance Testing",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "keywords": ["k6", "performance-test", "mock-server", "api"],
+  "author": "QA Team",
+  "license": "ISC"
+}

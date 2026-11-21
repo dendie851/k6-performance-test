@@ -1,0 +1,36 @@
+[
+  {
+    "id": 1,
+    "title": "Performance Test Suite Release v2.0",
+    "content": "Pembaruan arsitektur pengujian performa k6 untuk microservices dengan SLA P90 < 5s.",
+    "author": "QA Team",
+    "category": "SYSTEM",
+    "status": "PUBLISHED",
+    "views": 150,
+    "createdAt": "2026-01-10T08:00:00.000Z",
+    "updatedAt": "2026-01-10T08:00:00.000Z"
+  },
+  {
+    "id": 2,
+    "title": "Jadwal Maintenance Server Tahunan",
+    "content": "Pemeliharaan rutin server database dan optimasi indeks data transaksi Q1 2026.",
+    "author": "DevOps",
+    "category": "MAINTENANCE",
+    "status": "PUBLISHED",
+    "views": 320,
+    "createdAt": "2026-01-15T09:30:00.000Z",
+    "updatedAt": "2026-01-15T09:30:00.000Z"
+  },
+  {
+    "id": 3,
+    "title": "Panduan Standarisasi API RESTful",
+    "content": "Konvensi standar endpoint, status code, error handling, dan skema respons JSON.",
+    "author": "Architecture Team",
+    "category": "GUIDELINE",
+    "status": "PUBLISHED",
+    "views": 410,
+    "createdAt": "2026-01-20T11:00:00.000Z",
+    "updatedAt": "2026-01-20T11:00:00.000Z"
+  }
+]
+

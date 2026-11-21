@@ -1,0 +1,48 @@
+[
+  {
+    "id": 1,
+    "code": "REF_CURR_IDR",
+    "name": "Indonesian Rupiah",
+    "category": "CURRENCY",
+    "description": "Standard Indonesian currency unit",
+    "createdAt": "2026-01-01T00:00:00.000Z",
+    "updatedAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": 2,
+    "code": "REF_CURR_USD",
+    "name": "US Dollar",
+    "category": "CURRENCY",
+    "description": "United States currency unit",
+    "createdAt": "2026-01-01T00:00:00.000Z",
+    "updatedAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": 3,
+    "code": "REF_STAT_ACT",
+    "name": "Status Active",
+    "category": "STATUS",
+    "description": "Active operational status",
+    "createdAt": "2026-01-01T00:00:00.000Z",
+    "updatedAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": 4,
+    "code": "REF_STAT_INA",
+    "name": "Status Inactive",
+    "category": "STATUS",
+    "description": "Inactive or suspended status",
+    "createdAt": "2026-01-01T00:00:00.000Z",
+    "updatedAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": 5,
+    "code": "REF_ROLE_ADM",
+    "name": "Administrator",
+    "category": "ROLE",
+    "description": "System administrator with full access",
+    "createdAt": "2026-01-01T00:00:00.000Z",
+    "updatedAt": "2026-01-01T00:00:00.000Z"
+  }
+]
+

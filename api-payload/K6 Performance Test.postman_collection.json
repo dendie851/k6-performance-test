@@ -1,0 +1,475 @@
+{
+  "info": {
+    "_postman_id": "ede5c104-d2d7-426c-8ead-91a7cc6fa862",
+    "name": "K6 Performance Test",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "11442516",
+    "_collection_link": "https://go.postman.co/collection/11442516-ede5c104-d2d7-426c-8ead-91a7cc6fa862?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Login (Get Bearer Token)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"username\": \"super\",\"password\": \"super123\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8080/api/login",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "login"
+          ]
+        },
+        "description": "Authenticate user credentials and receive Bearer Token"
+      },
+      "response": []
+    },
+    {
+      "name": "Reference - List (View)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{bearer_token}}"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "http://127.0.0.1:8080/api/references",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "references"
+          ]
+        },
+        "description": "Retrieve list of references"
+      },
+      "response": []
+    },
+    {
+      "name": "References  - Check Code Availability (View)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{bearer_token}}"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "http://127.0.0.1:8080/api/references/check-code",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "references",
+            "check-code"
+          ]
+        },
+        "description": "Check whether reference code is available"
+      },
+      "response": []
+    },
+    {
+      "name": "References - Get Reference by ID (View)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{bearer_token}}"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "http://127.0.0.1:8080/api/references/1",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "references",
+            "1"
+          ]
+        },
+        "description": "Get detailed information of single reference"
+      },
+      "response": []
+    },
+    {
+      "name": "References  - Create  (Input)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{bearer_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"code\": \"REF_PAY_CC\",\"name\": \"Credit Card Payment\",\"category\": \"PAYMENT_METHOD\",\"description\": \"Credit card payment gateway reference\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8080/api/references",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "references"
+          ]
+        },
+        "description": "Create a new reference entry"
+      },
+      "response": []
+    },
+    {
+      "name": "References  - Update Reference (Update)",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{bearer_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"name\": \"Credit Card Visa/Mastercard\",\"description\": \"Updated credit card description\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8080/api/references/1",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "references",
+            "1"
+          ]
+        },
+        "description": "Update existing reference entry"
+      },
+      "response": []
+    },
+    {
+      "name": "References  - Delete  (Delete)",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{bearer_token}}"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "http://127.0.0.1:8080/api/references/5",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "references",
+            "5"
+          ]
+        },
+        "description": "Delete a reference entry"
+      },
+      "response": []
+    },
+    {
+      "name": "News - List (View)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{bearer_token}}"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "http://127.0.0.1:8080/api/news",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "news"
+          ]
+        },
+        "description": "Retrieve list of published news"
+      },
+      "response": []
+    },
+    {
+      "name": "News - Get News by ID (View)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{bearer_token}}"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "http://127.0.0.1:8080/api/news/1",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "news",
+            "1"
+          ]
+        },
+        "description": "Get detailed news article by ID"
+      },
+      "response": []
+    },
+    {
+      "name": "News - Create News (Input)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{bearer_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"title\": \"Implementasi Testing Otomatis dengan k6\",\"content\": \"Panduan dan dokumentasi implementasi load test menggunakan tool k6 untuk endpoint microservice.\",\"author\": \"QA Automation Team\",\"category\": \"TECH\",\"status\": \"PUBLISHED\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8080/api/news",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "news"
+          ]
+        },
+        "description": "Create a new news publication"
+      },
+      "response": []
+    },
+    {
+      "name": "News - Update(Update)",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{bearer_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"title\": \"Implementasi Testing Otomatis dengan k6 (Revisi)\",\"content\": \"Pembaruan instruksi load test dan baseline SLA 5000ms.\",\"status\": \"PUBLISHED\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8080/api/news/1",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "news",
+            "1"
+          ]
+        },
+        "description": "Update existing news publication"
+      },
+      "response": []
+    },
+    {
+      "name": "News - Delete (Delete)",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{bearer_token}}"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "http://127.0.0.1:8080/api/news/3",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "news",
+            "3"
+          ]
+        },
+        "description": "Delete news article"
+      },
+      "response": []
+    }
+  ]
+}
