@@ -1,242 +1,263 @@
-# Performance Testing Suite - Gems Backend API
+# Performance Testing Suite - k6
 
-Dokumentasi ini berisi panduan lengkap mengenai pengujian performa menggunakan k6 untuk proyek Gems Backend.
+Dokumentasi ini berisi panduan lengkap pengujian performa (*load testing & stress testing*) menggunakan **k6**, mencakup persiapan Mock API Server, integrasi Postman, eksekusi skrip k6 modular, analisis hasil metrik, hingga sampel dokumen laporan resmi.
 
-## Daftar Isi
+---
+
+## 📑 Daftar Isi
 1. [Apa itu Performance Test?](#1-apa-itu-performance-test)
-2. [Apa itu k6?](#2-apa-itu-k6)
-    * [Hello World k6](#hello-world-k6)
-3. [Mapping API Collection ke Script k6](#3-mapping-api-collection-ke-script-k6)
-4. [Struktur Proyek](#4-struktur-proyek)
-5. [Panduan Instalasi dan Menjalankan k6](#5-panduan-instalasi-dan-menjalankan-k6)
-    * [Langkah 1: Instalasi](#langkah-1-instalasi)
-    * [Langkah 2: Verifikasi](#langkah-2-verifikasi)
-    * [Langkah 3: Hello World k6](#langkah-3-hello-world-k6)
-    * [Langkah 4: Konfigurasi Login & Menjalankan Test](#langkah-4-konfigurasi-login--menjalankan-test)
-        * [A. Logika Login Program](#a-logika-login-program)
-        * [B. Cara Menjalankan Test](#b-cara-menjalankan-test)
-    * [Langkah 5: Cara Membaca Hasil Performance Test k6](#langkah-5-cara-membaca-hasil-performance-test-k6)
-        * [Cara Membaca Metrik Utama](#cara-membaca-metrik-utama)
-6. [Manajemen Source Code & Kolaborasi QA](#6-manajemen-source-code--kolaborasi-qa)
-7. [Service Level Agreement (SLA)](#7-service-level-agreement-sla)
-8. [Autoscaling & Infrastruktur (GKE)](#8-autoscaling--infrastruktur-gke)
-9. [Optimasi TCP Connection & Handshake](#9-optimasi-tcp-connection--handshake)
+2. [Apa itu k6 & Hello World](#2-apa-itu-k6--hello-world)
+3. [Struktur Proyek](#3-struktur-proyek)
+4. [Menjalankan Mock API Server](#4-menjalankan-mock-api-server)
+5. [Pengujian Endpoint via Postman (Uji Fungsional Awal)](#5-pengujian-endpoint-via-postman-uji-fungsional-awal)
+6. [Panduan Instalasi & Eksekusi k6](#6-panduan-instalasi--eksekusi-k6)
+    * [Langkah 1: Instalasi k6](#langkah-1-instalasi-k6)
+    * [Langkah 2: Verifikasi Instalasi](#langkah-2-verifikasi-instalasi)
+    * [Langkah 3: Performance Test Modul Login](#langkah-3-performance-test-modul-login)
+    * [Langkah 4: Performance Test Modul Reference (CRUD)](#langkah-4-performance-test-modul-reference-crud)
+    * [Langkah 5: Menjalankan Seluruh Modul Secara Paralel (main.js)](#langkah-5-menjalankan-seluruh-modul-secara-paralel-mainjs)
+7. [Hasil Pengujian & Sampel Laporan (Report PDF)](#7-hasil-pengujian--sampel-laporan-report-pdf)
+    * [Cara Membaca Metrik Utama](#cara-membaca-metrik-utama)
+    * [Download Dokumen Sampel Report](#download-dokumen-sampel-report)
+8. [Manajemen Source Code & Kolaborasi QA](#8-manajemen-source-code--kolaborasi-qa)
+9. [Service Level Agreement (SLA)](#9-service-level-agreement-sla)
+10. [Optimasi TCP Connection & Handshake (Windows)](#10-optimasi-tcp-connection--handshake-windows)
 
 ---
 
 ## 1. Apa itu Performance Test?
-**Performance Test** adalah jenis pengujian perangkat lunak yang dilakukan untuk memastikan aplikasi berjalan dengan baik di bawah beban kerja tertentu. Tujuan utamanya bukan untuk menemukan bug fungsional, melainkan untuk menghilangkan hambatan performa (*bottlenecks*).
+**Performance Test** adalah pengujian perangkat lunak untuk memastikan aplikasi berjalan dengan baik di bawah beban kerja tertentu (*load/stress*). Tujuannya adalah mengidentifikasi dan menghilangkan hambatan performa (*bottlenecks*).
 
-Fokus pengujian ini meliputi:
-*   **Speed**: Menentukan seberapa cepat aplikasi merespons.
-*   **Scalability**: Menentukan beban maksimum pengguna yang dapat ditangani.
-*   **Stability**: Menentukan apakah aplikasi stabil di bawah beban yang bervariasi.
+Fokus utama pengujian ini meliputi:
+*   **Speed**: Seberapa cepat aplikasi merespons request pengguna.
+*   **Scalability**: Berapa kapasitas beban maksimum (Virtual Users) yang dapat ditangani.
+*   **Stability**: Apakah aplikasi stabil di bawah beban tinggi yang konstan maupun lonjakan drastis.
 
 ---
 
-## 2. Apa itu k6?
-**k6** adalah alat pengujian beban (*load testing*) modern yang bersifat open-source dan berbasis JavaScript. k6 dirancang untuk memberikan pengalaman pengembang terbaik dalam membangun test suite yang performan dan dapat diskalakan.
+## 2. Apa itu k6 & Hello World
+**k6** adalah alat pengujian beban (*load testing*) modern open-source berbasis Go dan JavaScript ES6. k6 dirancang untuk memberikan performa tinggi dengan konsumsi memori yang sangat efisien.
 
-### Hello World k6
-File: `test-koneksi.js`
-Script ini adalah contoh sederhana (*Hello World*) untuk memvalidasi apakah k6 sudah terinstal dan dapat menjalankan perintah dasar.
+### Hello World k6 (`test-koneksi.js`)
+File ini digunakan untuk memvalidasi koneksi dan memastikan k6 bekerja dengan benar:
 
 ```javascript
 import http from 'k6/http';
 import { sleep } from 'k6';
 
 export default function () {
-    // Melakukan GET request sederhana ke website testing k6
     http.get('https://test.k6.io');
     sleep(1);
 }
 ```
-![Hello World Run](k6-panduan-installasi/4-sample-run-test-png.png)
 
----
-
-## 3. Mapping API Collection ke Script k6
-Proyek ini mengotomatisasi konversi dari **Postman Collection** menjadi script k6 yang terorganisir per Resource (folder). Setiap folder di Postman akan menjadi satu file `.js` di dalam folder `scripts/`.
-
----
-
-## 4. Struktur Proyek
-Struktur direktori diatur secara modular untuk memudahkan pengelolaan:
-
-*   **`api-collection/`**: Berisi file JSON Postman Collection asli yang menjadi sumber data skrip.
-*   **`lib/`**: Berisi helper utama dan fungsi reusable, seperti `auth_helper.js` untuk proses login.
-*   **`scritps/`**: Berisi seluruh skrip pengujian k6 yang dipisahkan berdasarkan modul API (misal: `references.js`, `news.js`).
-*   **`logs/`**: Tempat penyimpanan hasil laporan pengujian dalam format `.txt` (tracing metrik dan error).
-*   **`k6-panduan-installasi/`**: Folder khusus penyimpanan aset gambar dan screenshot untuk dokumentasi ini.
-*   **`main.js`**: Runner utama yang mengonsolidasikan seluruh skenario untuk dijalankan bersamaan.
-
----
-
-## 5. Panduan Instalasi dan Menjalankan k6
-
-### Langkah 1: Instalasi
-Download installer k6 melalui situs resmi atau gunakan package manager.
-![Instalasi k6](k6-panduan-installasi/1-instalasi-k6.png)
-
-### Langkah 2: Verifikasi
-Buka terminal (CMD/PowerShell) dan ketik `k6 version`. Jika muncul versi k6, maka instalasi sukses.
-![Verifikasi Sukses](k6-panduan-installasi/2-instalasi-verifikasi-sukses-k6.png)
-
-### Langkah 3: Hello World k6
-Jalankan perintah berikut untuk mengetes k6 pertama kali:
-`k6 run test-koneksi.js`
-![Test k6](k6-panduan-installasi/3-test-k6.png)
-![Hello World Run](k6-panduan-installasi/4-sample-run-test-png.png)
-
-### Langkah 4: Konfigurasi Login & Menjalankan Test
-
-#### A. Logika Login Program
-File: `lib/auth_helper.js`
-Sebelum menjalankan test utama, pastikan modul login sudah dikonfigurasi dengan kredensial yang benar. Modul ini digunakan untuk mendapatkan Bearer Token.
-
-```javascript
-export function login() {
-    const url = `${baseUrl}/api/v1/login`;
-    const payload = JSON.stringify({
-        username: "super",
-        password: "super123"
-    });
-    const res = http.post(url, payload, { headers: { 'Content-Type': 'application/json' } });
-    
-    if (res.status === 200) {
-        const body = res.json();
-        if (body.data && body.data.token) {
-            return body.data.token; // Mengembalikan Bearer Token
-        }
-    }
-    console.error("Login failed!");
-    return null;
-}
+Jalankan perintah berikut:
+```bash
+k6 run test-koneksi.js
 ```
 
-#### B. Cara Menjalankan Test
-Setelah konfigurasi siap, Anda bisa menjalankan per file resource atau menggunakan Runner utama.
+![Test k6 Hello World](k6-panduan-installasi/3-test-k6.png)
 
-**Menjalankan Resource Tertentu:**
-`k6 run scripts/references.js 2> logs/trace-references.log`
+---
 
-Setting Skenario & Virtual User:
-![Setting Skenario & Virtual User](k6-panduan-installasi/9-setting-scenarion-duration-virtual-user.png)
+## 3. Struktur Proyek
+Struktur direktori ditata secara modular agar mudah dipelajari oleh pemula dan siap untuk kolaborasi tim QA:
 
-Setting Running Hit Endpoint API:
-![Running Hit Endpoint API](k6-panduan-installasi/10-setting-running-hit-endpoint-api.png)
+```text
+k6-performance-test/
+├── api-server/                     # Mock API Server Node.js (In-Memory Data)
+│   ├── data/                       # Mock data JSON (references.json, news.json)
+│   ├── server.js                   # Server HTTP Node.js (Zero Dependencies)
+│   ├── server-express.js           # Server versi Express.js
+│   └── package.json
+├── api-payload/                    # Koleksi Postman & Contoh Request Body JSON
+│   ├── k6-api-collection.postman_collection.json
+│   ├── k6-api-environment.postman_environment.json
+│   ├── login-payload.json
+│   ├── reference-create-payload.json
+│   └── news-create-payload.json
+├── lib/                            # Reusable Helpers
+│   └── auth_helper.js              # Helper fungsi login & penyedia Authorization Header
+├── scripts/                        # Skrip Pengujian k6 per Modul
+│   ├── login.js                    # Testing login endpoint & penerimaan Bearer token
+│   ├── reference.js                # Testing CRUD modul Reference
+│   └── news.js                     # Testing CRUD modul News
+├── logs/                           # Tempat penyimpanan hasil test (.log / .txt)
+├── main.js                         # Runner utama pengujian multi-skenario (paralel)
+├── report-performance-test.pdf     # Sampel laporan resmi Performance Test (PDF)
+├── report-performance-test.docx    # Sampel laporan resmi Performance Test (Word)
+└── k6-panduan-installasi/          # Aset dokumentasi dan screenshot panduan
+```
 
-Result Performance Test:
-![Result Performance Test](k6-panduan-installasi/5-result-perfomace-test.png)
+---
 
+## 4. Menjalankan Mock API Server
+Sebelum menjalankan k6 atau Postman, jalankan mock API server di terminal:
 
-**Menjalankan Seluruh API (Parallel):**
-`k6 run main.js logs/main.log`
+```bash
+cd api-server
+npm start
+```
+Server akan aktif di `http://127.0.0.1:8080`.
 
-Setting Skenario & Virtual User:
-![Setting Skenario & Virtual User](k6-panduan-installasi/12-run-all-setting-skenario-test-setiap-kelompok-api.png)
+![Menjalankan Server API](k6-panduan-installasi/3-run-server-api.png)
 
-Result Performance Test:
-![Result Performance Test](k6-panduan-installasi/11-run-all-endpoint-otomatic.png)
+---
 
+## 5. Pengujian Endpoint via Postman (Uji Fungsional Awal)
+Sebelum melakukan stress testing dengan k6, validasi endpoint menggunakan Postman:
 
+1. Import file `api-payload/k6-api-collection.postman_collection.json` dan `api-payload/k6-api-environment.postman_environment.json` ke Postman:
 
-### Langkah 5: Cara Membaca Hasil Performance Test k6
-Setelah selesai, k6 akan menampilkan ringkasan performa di terminal dan menyimpan log detail di folder `logs/`.
+![Import Payload JSON ke Postman](k6-panduan-installasi/4-ipayload-json-import-api.png)
 
-![Result Performance](k6-panduan-installasi/5-result-perfomace-test.png)
+2. Jalankan request **Login** di folder `01 - Authentication`. Token otomatis tersimpan ke environment variable `bearer_token`:
 
-#### Cara Membaca Metrik Utama:
-Berikut adalah penjelasan metrik yang paling penting untuk dipantau:
+![API Test Login via Postman](k6-panduan-installasi/5-api-test-login-via-postmant.png)
+
+3. Uji endpoint **Reference** (View list, detail, create, update, delete) dengan header Bearer Token yang sudah terpasang otomatis:
+
+![API Test View Data Reference 1](k6-panduan-installasi/6-api-test-view-data-via-endpoint-reference.png)
+![API Test View Data Reference 2](k6-panduan-installasi/7-api-test-view-data-via-endpoint-reference-2.png)
+
+---
+
+## 6. Panduan Instalasi & Eksekusi k6
+
+### Langkah 1: Instalasi k6
+Download installer resmi k6 untuk Windows atau gunakan package manager:
+```powershell
+winget install k6 --source winget
+```
+
+![Instalasi k6](k6-panduan-installasi/1-instalasi-k6.png)
+
+### Langkah 2: Verifikasi Instalasi
+Buka terminal dan pastikan k6 sudah terpasang:
+```bash
+k6 version
+```
+
+![Verifikasi Instalasi Sukses](k6-panduan-installasi/2-instalasi-verifikasi-sukses-k6.png)
+
+---
+
+### Langkah 3: Performance Test Modul Login
+File: `scripts/login.js`
+
+1. Sesuaikan variabel jumlah pengguna simulasi (`VUS`) dan lama pengujian (`DURATION`) pada skrip:
+
+![Setting VUs & Duration Login](k6-panduan-installasi/9-k6-performance-test-login-setting-vuser-durattion.png)
+
+2. Jalankan pengujian:
+```bash
+k6 run scripts/login.js
+```
+
+![Eksekusi Performance Test Login](k6-panduan-installasi/8-k6-performance-test-login.png)
+
+---
+
+### Langkah 4: Performance Test Modul Reference (CRUD)
+File: `scripts/reference.js`
+
+1. Konfigurasi `VUS`, `DURATION`, dan fungsi endpoint yang ingin diuji:
+
+![Setting VUs & Duration Reference](k6-panduan-installasi/11-k6-performance-test-reference-setting-vuser-duration.png)
+
+2. Jalankan pengujian:
+```bash
+k6 run scripts/reference.js
+```
+
+![Eksekusi Performance Test Reference](k6-panduan-installasi/10-k6-performance-test-reference.png)
+
+---
+
+### Langkah 5: Menjalankan Seluruh Modul Secara Paralel (main.js)
+File: `main.js`
+
+Runner utama mengeksekusi modul `login`, `reference`, dan `news` secara bersamaan menggunakan fitur **multi-scenario** k6:
+
+![Setting Multi-Scenario](k6-panduan-installasi/12-run-all-setting-skenario-test-setiap-kelompok-api.png)
+
+Jalankan perintah berikut:
+```bash
+k6 run main.js
+```
+
+---
+
+## 7. Hasil Pengujian & Sampel Laporan (Report PDF)
+
+### Cara Membaca Metrik Utama
+Setelah pengujian selesai, k6 menampilkan tabel metrik performa di terminal dan menyimpan file ke folder `logs/`:
 
 *   **`http_req_duration` (Latency)**: Waktu yang dibutuhkan server untuk merespons permintaan.
     *   `avg`: Rata-rata waktu respon.
-    *   `p(95)`: 95% permintaan memiliki waktu respon di bawah angka ini (standar industri untuk performa).
-*   **`http_reqs` (Throughput)**: Jumlah total permintaan dan rata-rata permintaan per detik (RPS). Contoh: `1.922973/s` berarti sekitar 2 permintaan per detik.
-*   **`checks` (Success Rate)**: Persentase keberhasilan pengujian berdasarkan kriteria yang ditentukan (misal: status 200).
-*   **`http_req_failed` (Error Rate)**: Persentase permintaan yang gagal. Idealnya harus **0.00%**.
-*   **`vus` (Virtual Users)**: Jumlah pengguna virtual yang aktif mensimulasikan beban selama pengujian.
-*   **`iterations`**: Jumlah total skenario yang berhasil diselesaikan oleh seluruh VUs.
-*   **`iteration_duration`**: Waktu rata-rata yang dibutuhkan untuk menyelesaikan satu siklus skenario (dari awal hingga akhir, termasuk waktu `sleep`).
+    *   `p(90)`: 90% request berada di bawah waktu ini (ambang batas SLA < 5000ms).
+    *   `p(95)`: 95% request memiliki waktu respon di bawah angka ini.
+*   **`http_reqs` (Throughput)**: Jumlah total request dan rata-rata request per detik (RPS).
+*   **`checks` (Tingkat Keberhasilan)**: Persentase validasi status code dan payload yang berhasil.
+*   **`http_req_failed` (Tingkat Error)**: Persentase request yang gagal (target SLA: `< 1%` atau `0.00%`).
+*   **`vus` (Virtual Users)**: Jumlah pengguna virtual aktif selama pengujian.
 
-![Daftar Log File](k6-panduan-installasi/7-list-log-file-result-performance-test.png)
-![Isi Log Tracing](k6-panduan-installasi/8-log-file-isi-log-tracing.png)
+Berikut tampilan sampel laporan pengujian performa:
 
----
+![Laporan Performance Test 1](k6-panduan-installasi/11-report-performance-test.png)
+![Laporan Performance Test 2](k6-panduan-installasi/12-report-performance-test.png)
 
-## 6. Manajemen Source Code & Kolaborasi QA
-Proyek ini didesain secara **Modular**, yang artinya setiap kelompok API dipisahkan ke dalam file yang berbeda. Struktur ini sangat mendukung kerja sama tim QA dalam jumlah banyak secara bersamaan (*Collaborative Testing*).
+### 📥 Download Dokumen Sampel Report
+Dokumen laporan resmi hasil uji performa lengkap (mencakup ringkasan eksekutif, grafik tren, analisis SLA, dan rekomendasi optimasi) dapat diakses melalui link berikut:
 
-### Alur Kerja Kolaborasi (Git Workflow)
-Dengan menggunakan sistem Git, tim QA dapat berbagi tugas tanpa saling mengganggu kode satu sama lain.
-
-![Isi Log Tracing](k6-panduan-installasi/14-git-workflow.png)
-
-### Keuntungan Struktur Modular:
-1.  **No Conflict**: QA A tidak akan bentrok dengan QA B karena mengedit file yang berbeda.
-2.  **Reusable**: Fungsi Login dan Header hanya perlu dikonfigurasi satu kali di folder `lib/`.
-3.  **Easy Maintenance**: Jika ada perubahan pada satu endpoint, cukup perbaiki satu file yang bersangkutan.
-4.  **Flexible Execution**: Setiap skrip di dalam `scripts/*.js` dapat dijalankan secara mandiri untuk pengujian unit API, atau digabungkan dalam `main.js` untuk simulasi beban penuh.
-
----
-## 7. Service Level Agreement (SLA)
-
-Bagian ini mendefinisikan standar keberhasilan untuk Performance Test yang dilakukan:
-
-### 1.1 Alat Pengujian
-*   **Tool**: k6 (Grafana k6)
-
-### 1.2 Skenario Load Testing
-Pengujian dilakukan dengan skenario bertahap (*Step Load*):
-*   **Tier 1**: 60 Virtual Users (VU) dengan waktu Ramp-up 60 detik.
-*   **Tier 2**: 120 Virtual Users (VU) dengan waktu Ramp-up 120 detik.
-*   **Tier 3**: 200 Virtual Users (VU) dengan waktu Ramp-up 200 detik.
-
-### 1.3 Kriteria Keberhasilan (Acceptance Criteria)
-Aplikasi dianggap lulus pengujian jika memenuhi ambang batas berikut:
-*   **Response Time**: P90 (90% dari total request) harus di bawah **5 detik**.
-*   **Error Rate**: Harus **0%** (tidak diperbolehkan ada kegagalan request HTTP).
+*   📄 **[Download report-performance-test.pdf](report-performance-test.pdf)** *(Format PDF siap cetak / presentasi)*
+*   📝 **[Download report-performance-test.docx](report-performance-test.docx)** *(Format Word dokumen yang dapat diedit)*
 
 ---
 
-## 8. Autoscaling & Infrastruktur (GKE)
+## 8. Manajemen Source Code & Kolaborasi QA
+Proyek ini mengadopsi prinsip arsitektur modular:
+1.  **Independent Scenarios**: Setiap modul (`login.js`, `reference.js`, `news.js`) dapat diuji sendiri-sendiri oleh QA tanpa bentrok (*merge conflicts*).
+2.  **Reusable Auth Helper**: Logika login dan pembuatan header Bearer Token diatur terpusat di `lib/auth_helper.js`.
+3.  **Independent Functions**: Setiap endpoint memiliki fungsi mandirinya sendiri, memudahkan pemula untuk mengaktifkan atau menonaktifkan endpoint pengujian hanya dengan tanda komentar (`//`).
 
-Untuk menangani beban tinggi saat pengujian (hingga 200 VU), infrastruktur menggunakan **Horizontal Pod Autoscaler (HPA)** pada Google Kubernetes Engine (GKE).
+---
 
-### 8.1 Konfigurasi Deployment
-File konfigurasi [gems-backend-deployment.yaml](gke/gems-backend-deployment.yaml) mengatur sumber daya dasar untuk setiap pod:
-*   **CPU Request**: 200m (0.2 Core)
-*   **Memory Request**: 512Mi
-*   **Memory Limit**: 1Gi
+## 9. Service Level Agreement (SLA)
+Kriteria kelulusan pengujian performa mengacu pada ambang batas (*thresholds*):
 
-### 8.2 Mekanisme Autoscaling (HPA)
-Sistem akan menambah jumlah pod secara otomatis berdasarkan metrik berikut:
-*   **Min Replicas**: 2 Pod (Ketersediaan minimum)
-*   **Max Replicas**: 15 Pod (Batas maksimal ekspansi saat beban puncak)
-*   **Target CPU**: 60% (Scale up jika rata-rata CPU > 60%)
-*   **Target Memory**: 70% (Scale up jika rata-rata RAM > 70%)
+```javascript
+thresholds: {
+    // 1. Error rate harus di bawah 1%
+    http_req_failed: ['rate<0.01'],
+    // 2. 90% dari total request (p90) harus memiliki waktu respon di bawah 5 detik
+    http_req_duration: ['p(90)<5000'],
+}
+```
 
-Hal ini memastikan aplikasi tetap stabil dan responsif meskipun jumlah pengguna (Virtual Users) meningkat drastis sesuai skenario SLA.
+*   **P90 Latency**: $\le 5000\text{ ms}$
+*   **Error Rate**: $< 1.00\%$
 
-## 9. Optimasi TCP Connection & Handshake
+---
 
-Saat menjalankan pengujian dengan jumlah Virtual Users (VU) yang besar, sistem operasi mungkin membatasi jumlah koneksi TCP aktif atau kecepatan *handshake* koneksi baru. Hal ini dapat menyebabkan error koneksi atau timeout meskipun aplikasi backend masih sanggup menangani beban.
+## 10. Optimasi TCP Connection & Handshake (Windows)
+Saat menjalankan pengujian beban tinggi dengan Virtual Users yang besar (100–1000 VU), sistem operasi Windows dapat membatasi alokasi port TCP atau kecepatan handshake koneksi baru.
 
-### 9.1 Gejala Limit TCP
-Jika batas TCP belum ditingkatkan, k6 akan menampilkan peringatan terkait kegagalan *handshake* atau kegagalan pembukaan soket baru karena antrean koneksi sistem sudah penuh.
+### 10.1 Gejala Limit TCP
+Jika batas koneksi belum dioptimasi, k6 akan menampilkan error koneksi soket atau kegagalan handshake:
 
 ![Gejala Limit TCP](k6-panduan-installasi/15-menambah-max-open-window-open-3.png)
 
-### 9.2 Optimasi Koneksi (Windows)
-Pada Windows, optimasi dilakukan dengan menyesuaikan parameter TCP stack agar mengizinkan lebih banyak koneksi simultan dan mempercepat proses pelepasan port yang sudah selesai digunakan (*TIME_WAIT*).
+### 10.2 Optimasi Koneksi (Registry Windows)
+Optimasi dilakukan dengan meningkatkan batas alokasi port dinamis (*MaxUserPort*) dan mempersingkat waktu tunggu pelepasan port (*TcpTimedWaitDelay*):
 
-![Optimasi TCP 1](k6-panduan-installasi/16-menambah-max-open-window-open-3.png)
+![Optimasi TCP Windows](k6-panduan-installasi/16-menambah-max-open-window-open-3.png)
 
-### 9.3 Verifikasi Handshake
-Setelah optimasi dilakukan, k6 akan dapat melakukan *handshake* ribuan koneksi secara stabil tanpa ada lonjakan error di awal pengujian (*ramp-up phase*).
+### 10.3 Verifikasi Handshake
+Setelah optimasi diterapkan, k6 dapat menangani koneksi simultan ribuan VU tanpa hambatan di fase *ramp-up*:
 
 ![Verifikasi TCP Handshake](k6-panduan-installasi/17-menambah-max-open-window-open-3.png)
 
 ---
 
-*Dibuat untuk Tim Performance Test - Praisindo Project Pegadaian*
+*Dibuat untuk Tim QA & Performance Testing*

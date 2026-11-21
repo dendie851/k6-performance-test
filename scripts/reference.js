@@ -8,8 +8,8 @@ import { baseUrl, getHeaders, login } from '../lib/auth_helper.js';
 // ====================================================================
 // 1. VARIABEL PENGATURAN TEST (MUDAH DIUBAH UNTUK LATIHAN)
 // ====================================================================
-const VUS = 60;           // Jumlah Virtual Users (pemakai simulasi)
-const DURATION = '60s';   // Lama durasi pengujian
+const VUS = 30;           // Jumlah Virtual Users (pemakai simulasi)
+const DURATION = '30s';   // Lama durasi pengujian
 
 export const options = {
     vus: VUS,
